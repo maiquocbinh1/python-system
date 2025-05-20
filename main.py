@@ -5,6 +5,7 @@ from PIL import Image as PILImage, ImageTk as PILImageTk
 from tkinter import *
 from tkinter import ttk, messagebox
 from time import strftime
+from student import Student  # Import lớp Student
 
 class Face_Recognition_System:
     def __init__(self, root):
@@ -104,7 +105,8 @@ class Face_Recognition_System:
             self.root.destroy()
 
     def student_details(self):
-        messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Sinh viên'")
+        new_window = Toplevel(self.root)
+        self.new_win = Student(new_window)
 
     def attendance_data(self):
         messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Điểm danh'")
