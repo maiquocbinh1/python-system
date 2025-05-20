@@ -10,7 +10,7 @@ class Face_Recognition_System:
     def __init__(self, root):
         self.root = root
         self.root.geometry("1530x790+0+0")
-        self.root.title("Hệ thống nhận diện khuôn mặt")
+        self.root.title("Hệ thống  diem danh sinh vien")
 
         today = strftime("%d-%m-%Y")
 
