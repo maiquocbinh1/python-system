@@ -1,4 +1,4 @@
-
+import sys
 import os
 import random
 from PIL import Image as PILImage, ImageTk as PILImageTk
@@ -6,12 +6,14 @@ from tkinter import *
 from tkinter import ttk, messagebox
 from time import strftime
 from student import Student  # Import lớp Student
+from subject import Subject
+import mysql.connector
 
 class Face_Recognition_System:
     def __init__(self, root):
         self.root = root
         self.root.geometry("1530x790+0+0")
-        self.root.title("Hệ thống  diem danh sinh vien")
+        self.root.title("Hệ thống điểm danh sinh viên")
 
         today = strftime("%d-%m-%Y")
 
@@ -112,7 +114,8 @@ class Face_Recognition_System:
         messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Điểm danh'")
 
     def subject_data(self):
-        messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Môn học'")
+        new_window = Toplevel(self.root)
+        self.new_win = Subject(new_window)
 
     def teacher_data(self):
         messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Giáo viên'")
@@ -123,6 +126,20 @@ class Face_Recognition_System:
     def report_data(self):
         messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Thống kê'")
 
+def connect_to_database():
+    try:
+        db_connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='',
+            database='pythonsystem',
+            port=3306
+        )
+        return db_connection
+    except mysql.connector.Error as err:
+        messagebox.showerror("Lỗi kết nối", f"Không thể kết nối đến cơ sở dữ liệu: {err}")
+        return None
+
 value_from_p1 = None
 
 def new_print(value):
@@ -130,6 +147,11 @@ def new_print(value):
     value_from_p1 = value
 
 if __name__ == "__main__":
-    root = Tk()
-    obj = Face_Recognition_System(root)
-    root.mainloop()
+    if len(sys.argv) > 1 and sys.argv[1] == "subject":
+        root = Tk()
+        obj = Subject(root)
+        root.mainloop()
+    else:
+        root = Tk()
+        obj = Face_Recognition_System(root)
+        root.mainloop()

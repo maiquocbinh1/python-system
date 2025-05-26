@@ -3,16 +3,31 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkcalendar import DateEntry
 from time import strftime
-import random
+import mysql.connector
 
 students_data = []
 classes_data = []
+
+def connect_to_database():
+    try:
+        db_connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='',
+            database='pythonsystem',
+            port=3306
+        )
+        print("Connection successful!")
+        return db_connection
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
 
 class Student:
     def __init__(self, root):
         self.root = root
         self.root.geometry("1530x790+0+0")
-        self.root.title("QLSV")
+        self.root.title("Hệ thống điểm danh sinh viên")
         today = strftime("%d-%m-%Y")
 
         # Variables
@@ -147,11 +162,6 @@ class Student:
         address_entry = ttk.Entry(class_student_frame, width=20, textvariable=self.var_address, font=("times new roman", 13, "bold"))
         address_entry.grid(row=4, column=1, padx=10, pady=10, sticky=W)
 
-        # Radio buttons
-        radionbtn1 = ttk.Radiobutton(class_student_frame, variable=self.var_radio1, text="Có ảnh", value="Yes")
-        radionbtn1.grid(row=6, column=0)
-        radionbtn2 = ttk.Radiobutton(class_student_frame, variable=self.var_radio1, text="Không ảnh", value="No")
-        radionbtn2.grid(row=6, column=1)
 
         # Button frame
         btn_frame = Frame(class_student_frame, bd=2, relief=RIDGE, bg="white")
@@ -206,7 +216,6 @@ class Student:
         self.student_table.heading("email", text="Email")
         self.student_table.heading("phone", text="Số điện thoại")
         self.student_table.heading("address", text="Địa chỉ")
-        self.student_table.heading("photo", text="Trạng thái ảnh")
         self.student_table["show"] = "headings"
         for col in ("id", "dep", "course", "year", "sem", "name", "div", "roll", "gender", "dob", "email", "phone", "address", "photo"):
             self.student_table.column(col, width=100)
@@ -270,33 +279,72 @@ class Student:
         self.time_label.config(text=strftime('%H:%M:%S %p'))
         self.time_label.after(1000, self.update_time)
 
-    # CRUD and search methods for students and classes (in-memory)
+    # CRUD and search methods for students and classes
     def add_data(self):
-        student_data = (
-            self.var_std_id.get(),
-            self.var_dep.get(),
-            self.var_course.get(),
-            self.var_year.get(),
-            self.var_semester.get(),
-            self.var_std_name.get(),
-            self.var_div.get(),
-            self.var_roll.get(),
-            self.var_gender.get(),
-            self.dob_entry.get_date().strftime('%d/%m/%Y'),
-            self.var_email.get(),
-            self.var_phone.get(),
-            self.var_address.get(),
-            self.var_radio1.get()
-        )
-        students_data.append(student_data)
-        self.fetch_data()
-        self.reset_data()
-        messagebox.showinfo("Thành công", "Thêm thông tin sinh viên thành công", parent=self.root)
+        if self.var_std_id.get() == "" or self.var_std_name.get() == "" or self.var_div.get() == "":
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin", parent=self.root)
+            return
+
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            # Check if student ID already exists
+            db_query.execute("SELECT * FROM student WHERE Student_id = %s", (self.var_std_id.get(),))
+            if db_query.fetchone():
+                messagebox.showerror("Lỗi", "ID sinh viên đã tồn tại", parent=self.root)
+                return
+
+            # Insert new student
+            sql = """INSERT INTO student (Student_id, Dep, course, Year, Semester, Name, Class, Roll, Gender, Dob, Email, Phone, Address) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            values = (
+                self.var_std_id.get(),
+                self.var_dep.get(),
+                self.var_course.get(),
+                self.var_year.get(),
+                self.var_semester.get(),
+                self.var_std_name.get(),
+                self.var_div.get(),
+                self.var_roll.get(),
+                self.var_gender.get(),
+                self.dob_entry.get_date().strftime('%d/%m/%Y'),
+                self.var_email.get(),
+                self.var_phone.get(),
+                self.var_address.get()
+            )
+            db_query.execute(sql, values)
+            db_connection.commit()
+            messagebox.showinfo("Thành công", "Thêm thông tin sinh viên thành công", parent=self.root)
+            self.fetch_data()
+            self.reset_data()
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     def fetch_data(self):
-        self.student_table.delete(*self.student_table.get_children())
-        for i in students_data:
-            self.student_table.insert("", END, values=i)
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            db_query.execute("SELECT * FROM student")
+            rows = db_query.fetchall()
+            self.student_table.delete(*self.student_table.get_children())
+            for row in rows:
+                self.student_table.insert("", END, values=row)
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     def get_cursor(self, event=""):
         cursor_focus = self.student_table.focus()
@@ -320,34 +368,73 @@ class Student:
         self.var_radio1.set(data[13])
 
     def update_data(self):
-        for i, student in enumerate(students_data):
-            if student[0] == self.var_std_id.get():
-                students_data[i] = (
-                    self.var_std_id.get(),
-                    self.var_dep.get(),
-                    self.var_course.get(),
-                    self.var_year.get(),
-                    self.var_semester.get(),
-                    self.var_std_name.get(),
-                    self.var_div.get(),
-                    self.var_roll.get(),
-                    self.var_gender.get(),
-                    self.dob_entry.get_date().strftime('%d/%m/%Y'),
-                    self.var_email.get(),
-                    self.var_phone.get(),
-                    self.var_address.get(),
-                    self.var_radio1.get()
-                )
-                break
-        self.fetch_data()
-        self.reset_data()
-        messagebox.showinfo("Thành công", "Cập nhật thông tin sinh viên thành công", parent=self.root)
+        if self.var_std_id.get() == "":
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên cần cập nhật", parent=self.root)
+            return
+
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            sql = """UPDATE student SET 
+                    Dep = %s, course = %s, Year = %s, Semester = %s, 
+                    Name = %s, Class = %s, Roll = %s, Gender = %s, 
+                    Dob = %s, Email = %s, Phone = %s, Address = %s 
+                    WHERE Student_id = %s"""
+            values = (
+                self.var_dep.get(),
+                self.var_course.get(),
+                self.var_year.get(),
+                self.var_semester.get(),
+                self.var_std_name.get(),
+                self.var_div.get(),
+                self.var_roll.get(),
+                self.var_gender.get(),
+                self.dob_entry.get_date().strftime('%d/%m/%Y'),
+                self.var_email.get(),
+                self.var_phone.get(),
+                self.var_address.get(),
+                self.var_std_id.get()
+            )
+            db_query.execute(sql, values)
+            db_connection.commit()
+            messagebox.showinfo("Thành công", "Cập nhật thông tin sinh viên thành công", parent=self.root)
+            self.fetch_data()
+            self.reset_data()
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     def delete_data(self):
-        students_data[:] = [s for s in students_data if s[0] != self.var_std_id.get()]
-        self.fetch_data()
-        self.reset_data()
-        messagebox.showinfo("Xóa", "Xóa sinh viên thành công", parent=self.root)
+        if self.var_std_id.get() == "":
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên cần xóa", parent=self.root)
+            return
+
+        if not messagebox.askyesno("Xác nhận", "Bạn có chắc chắn muốn xóa sinh viên này?", parent=self.root):
+            return
+
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            db_query.execute("DELETE FROM student WHERE Student_id = %s", (self.var_std_id.get(),))
+            db_connection.commit()
+            messagebox.showinfo("Thành công", "Xóa sinh viên thành công", parent=self.root)
+            self.fetch_data()
+            self.reset_data()
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     def reset_data(self):
         self.var_dep.set("Chọn chuyên ngành")
@@ -367,37 +454,93 @@ class Student:
 
     def search_data(self):
         if self.var_com_search.get() == "" or self.var_search.get() == "":
-            messagebox.showerror("Lỗi !", "Vui lòng nhập thông tin đầy đủ", parent=self.root)
+            messagebox.showerror("Lỗi", "Vui lòng nhập thông tin tìm kiếm", parent=self.root)
             return
-        search_field = 0
-        if self.var_com_search.get() == "ID Sinh viên":
-            search_field = 0
-        elif self.var_com_search.get() == "Tên sinh viên":
-            search_field = 5
-        elif self.var_com_search.get() == "Lớp biên chế":
-            search_field = 6
-        search_term = self.var_search.get().lower()
-        filtered_data = [s for s in students_data if str(s[search_field]).lower().find(search_term) != -1]
-        self.student_table.delete(*self.student_table.get_children())
-        for i in filtered_data:
-            self.student_table.insert("", END, values=i)
-        if filtered_data:
-            messagebox.showinfo("Thông báo", f"Có {len(filtered_data)} bản ghi thỏa mãn điều kiện", parent=self.root)
-        else:
-            messagebox.showinfo("Thông báo", "Không có bản ghi nào thỏa mãn điều kiện", parent=self.root)
+
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            search_field = ""
+            if self.var_com_search.get() == "ID Sinh viên":
+                search_field = "Student_id"
+            elif self.var_com_search.get() == "Tên sinh viên":
+                search_field = "Name"
+            elif self.var_com_search.get() == "Lớp biên chế":
+                search_field = "Class"
+
+            sql = f"SELECT * FROM student WHERE {search_field} LIKE %s"
+            db_query.execute(sql, (f"%{self.var_search.get()}%",))
+            rows = db_query.fetchall()
+            
+            self.student_table.delete(*self.student_table.get_children())
+            for row in rows:
+                self.student_table.insert("", END, values=row)
+            
+            if rows:
+                messagebox.showinfo("Thông báo", f"Có {len(rows)} bản ghi thỏa mãn điều kiện", parent=self.root)
+            else:
+                messagebox.showinfo("Thông báo", "Không có bản ghi nào thỏa mãn điều kiện", parent=self.root)
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     # Class management (in-memory)
     def add_Classdata(self):
-        class_data = (self.var_class.get(), self.var_nameclass.get())
-        classes_data.append(class_data)
-        self.fetch_Classdata()
-        self.reset_Classdata()
-        messagebox.showinfo("Thành công", "Thêm thông tin lớp học thành công", parent=self.root)
+        if self.var_class.get() == "" or self.var_nameclass.get() == "":
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin", parent=self.root)
+            return
+
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            # Check if class already exists
+            db_query.execute("SELECT * FROM class WHERE Class = %s", (self.var_class.get(),))
+            if db_query.fetchone():
+                messagebox.showerror("Lỗi", "Lớp học đã tồn tại", parent=self.root)
+                return
+
+            # Insert new class
+            sql = "INSERT INTO class (Class, Name) VALUES (%s, %s)"
+            values = (self.var_class.get(), self.var_nameclass.get())
+            db_query.execute(sql, values)
+            db_connection.commit()
+            messagebox.showinfo("Thành công", "Thêm thông tin lớp học thành công", parent=self.root)
+            self.fetch_Classdata()
+            self.reset_Classdata()
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     def fetch_Classdata(self):
-        self.StudentTable.delete(*self.StudentTable.get_children())
-        for i in classes_data:
-            self.StudentTable.insert("", END, values=i)
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            db_query.execute("SELECT * FROM class")
+            rows = db_query.fetchall()
+            self.StudentTable.delete(*self.StudentTable.get_children())
+            for row in rows:
+                self.StudentTable.insert("", END, values=row)
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     def get_cursorClass(self, event=""):
         cursor_row = self.StudentTable.focus()
@@ -409,19 +552,55 @@ class Student:
         self.var_nameclass.set(rows[1])
 
     def update_Classdata(self):
-        for i, class_data in enumerate(classes_data):
-            if class_data[0] == self.var_class.get():
-                classes_data[i] = (self.var_class.get(), self.var_nameclass.get())
-                break
-        self.fetch_Classdata()
-        self.reset_Classdata()
-        messagebox.showinfo("Thành công", "Cập nhật thông tin lớp học thành công", parent=self.root)
+        if self.var_class.get() == "":
+            messagebox.showerror("Lỗi", "Vui lòng chọn lớp cần cập nhật", parent=self.root)
+            return
+
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            sql = "UPDATE class SET Name = %s WHERE Class = %s"
+            values = (self.var_nameclass.get(), self.var_class.get())
+            db_query.execute(sql, values)
+            db_connection.commit()
+            messagebox.showinfo("Thành công", "Cập nhật thông tin lớp học thành công", parent=self.root)
+            self.fetch_Classdata()
+            self.reset_Classdata()
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     def delete_Classdata(self):
-        classes_data[:] = [c for c in classes_data if c[0] != self.var_class.get()]
-        self.fetch_Classdata()
-        self.reset_Classdata()
-        messagebox.showinfo("Xóa", "Xóa bản ghi thành công", parent=self.root)
+        if self.var_class.get() == "":
+            messagebox.showerror("Lỗi", "Vui lòng chọn lớp cần xóa", parent=self.root)
+            return
+
+        if not messagebox.askyesno("Xác nhận", "Bạn có chắc chắn muốn xóa lớp học này?", parent=self.root):
+            return
+
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            db_query.execute("DELETE FROM class WHERE Class = %s", (self.var_class.get(),))
+            db_connection.commit()
+            messagebox.showinfo("Thành công", "Xóa lớp học thành công", parent=self.root)
+            self.fetch_Classdata()
+            self.reset_Classdata()
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
     def reset_Classdata(self):
         self.var_class.set("")
@@ -429,20 +608,39 @@ class Student:
 
     def search_Classdata(self):
         if self.var_com_searchclass.get() == "" or self.var_searchclass.get() == "":
-            messagebox.showerror("Lỗi !", "Vui lòng nhập thông tin đầy đủ", parent=self.root)
+            messagebox.showerror("Lỗi", "Vui lòng nhập thông tin tìm kiếm", parent=self.root)
             return
-        search_field = 0 if self.var_com_searchclass.get() == "Lớp" else 1
-        search_term = self.var_searchclass.get().lower()
-        filtered_data = [c for c in classes_data if str(c[search_field]).lower().find(search_term) != -1]
-        self.StudentTable.delete(*self.StudentTable.get_children())
-        for i in filtered_data:
-            self.StudentTable.insert("", END, values=i)
-        if filtered_data:
-            messagebox.showinfo("Thông báo", f"Có {len(filtered_data)} bản ghi thỏa mãn điều kiện", parent=self.root)
-        else:
-            messagebox.showinfo("Thông báo", "Không có bản ghi nào thỏa mãn điều kiện", parent=self.root)
+
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
+
+        try:
+            db_query = db_connection.cursor()
+            search_field = "Class" if self.var_com_searchclass.get() == "Lớp" else "Name"
+            sql = f"SELECT * FROM class WHERE {search_field} LIKE %s"
+            db_query.execute(sql, (f"%{self.var_searchclass.get()}%",))
+            rows = db_query.fetchall()
+            
+            self.StudentTable.delete(*self.StudentTable.get_children())
+            for row in rows:
+                self.StudentTable.insert("", END, values=row)
+            
+            if rows:
+                messagebox.showinfo("Thông báo", f"Có {len(rows)} bản ghi thỏa mãn điều kiện", parent=self.root)
+            else:
+                messagebox.showinfo("Thông báo", "Không có bản ghi nào thỏa mãn điều kiện", parent=self.root)
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}", parent=self.root)
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
 if __name__ == "__main__":
+    db_connection = connect_to_database()
+    if db_connection:
+        db_connection.close()
     root = Tk()
     obj = Student(root)
     root.mainloop()

@@ -6,8 +6,23 @@ from datetime import datetime
 from time import strftime
 from math import *
 from main import Face_Recognition_System ,new_print
+import mysql.connector
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) #duongdanthumucdetruycapanh
+
+def connect_to_database():
+    try:
+        conn = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='',
+            database='pythonsystem',
+            port=3306
+        )
+        return conn
+    except mysql.connector.Error as err:
+        messagebox.showerror("Lỗi kết nối", f"Không thể kết nối đến cơ sở dữ liệu: {err}")
+        return None
 
 class Login_Window:
     def __init__(self, root):
@@ -87,27 +102,42 @@ class Login_Window:
             messagebox.showerror("Lỗi !!", "Vui lòng nhập đầy đủ thông tin")
             return
 
-        # Tài khoản dùng thử (không cần CSDL)
-        email_demo = "admin"
-        pass_demo = "123456"
+        db_connection = connect_to_database()
+        if not db_connection:
+            return
 
-        if self.varcheck.get() == 1:
-            if self.var_email.get() == email_demo and self.var_password.get() == pass_demo:
-                new_print("0")
-                self.reset()#xoathongtindanhapkhidangnhapthanhcong
-                messagebox.showinfo("Thông báo", "Đăng nhập  thành công với quyền Admin")
-                self.new_window = Toplevel(self.root)#mocuasomoi
-                self.app = Face_Recognition_System(self.new_window)
-            else:
-                messagebox.showerror("Lỗi", "Sai tài khoản hoặc mật khẩu ")
-        else:
-            if self.var_email.get() == email_demo and self.var_password.get() == pass_demo:#dangnhapvoitucachngdungthongthuong
-                new_print("HS001")
-                self.reset()
-                self.new_window = Toplevel(self.root)
-                self.app = Face_Recognition_System (self.new_window)
-            else:
-                messagebox.showerror("Lỗi", "Sai tài khoản hoặc mật khẩu ")
+        try:
+            db_query = db_connection.cursor()
+            
+            if self.varcheck.get() == 1:  # Admin login
+                db_query.execute("SELECT * FROM admin WHERE Account = %s AND Password = %s",
+                             (self.var_email.get(), self.var_password.get()))
+                if db_query.fetchone():
+                    new_print("0")
+                    self.reset()#xoathongtindanhapkhidangnhapthanhcong
+                    messagebox.showinfo("Thông báo", "Đăng nhập thành công với quyền Admin")
+                    self.new_window = Toplevel(self.root)#mocuasomoi
+                    self.app = Face_Recognition_System(self.new_window)
+                else:
+                    messagebox.showerror("Lỗi", "Sai tài khoản hoặc mật khẩu")
+            else:  # Teacher login
+                db_query.execute("SELECT * FROM teacher WHERE Email = %s AND Password = %s",
+                             (self.var_email.get(), self.var_password.get()))
+                teacher = db_query.fetchone()
+                if teacher:
+                    new_print(teacher[0])  # Pass teacher ID
+                    self.reset()
+                    self.new_window = Toplevel(self.root)
+                    self.app = Face_Recognition_System(self.new_window)
+                else:
+                    messagebox.showerror("Lỗi", "Sai tài khoản hoặc mật khẩu")
+
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi", f"Lỗi cơ sở dữ liệu: {err}")
+        finally:
+            if db_connection.is_connected():
+                db_query.close()
+                db_connection.close()
 
 if __name__ == "__main__":
     root = Tk()
