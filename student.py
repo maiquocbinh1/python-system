@@ -205,7 +205,7 @@ class Student:
         scroll_y.config(command=self.student_table.yview)
         self.student_table.heading("id", text="ID Sinh viên")
         self.student_table.heading("dep", text="Chuyên ngành")
-        self.student_table.heading("course", text="Chương trình học")
+        self.student_table.heading("course", text="Hệ đào tạo")
         self.student_table.heading("year", text="Năm học")
         self.student_table.heading("sem", text="Học kì")
         self.student_table.heading("name", text="Họ tên")
@@ -247,6 +247,7 @@ class Student:
         subsub_label.place(x=20, y=165, width=80)
         subsub_entry = ttk.Entry(underright_frame, width=22, textvariable=self.var_nameclass, font=("times new roman", 12, "bold"))
         subsub_entry.place(x=135, y=165, width=200)
+        btn_framestd = Frame(underright_frame, bg="white", bd=2, relief=RIDGE)
         btn_framestd = Frame(underright_frame, bg="white", bd=2, relief=RIDGE)
         btn_framestd.place(x=20, y=245, width=455, height=55)
         addTc_btn = Button(btn_framestd, text="Thêm mới", command=self.add_Classdata, font=("times new roman", 12, "bold"), bg="#fbd568", fg="#996319", width=10)
@@ -361,7 +362,16 @@ class Student:
         self.var_div.set(data[6])
         self.var_roll.set(data[7])
         self.var_gender.set(data[8])
-        self.dob_entry.set_date(data[9])
+        # Xử lý ngày sinh đúng định dạng dd/mm/yyyy
+        try:
+            from datetime import datetime
+            dob_str = data[9]
+            if dob_str:
+                dob_date = datetime.strptime(dob_str, '%d/%m/%Y').date()
+                self.dob_entry.set_date(dob_date)
+        except Exception:
+            from datetime import date
+            self.dob_entry.set_date(date.today())
         self.var_email.set(data[10])
         self.var_phone.set(data[11])
         self.var_address.set(data[12])

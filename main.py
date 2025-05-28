@@ -8,6 +8,7 @@ from time import strftime
 from student import Student  # Import lớp Student
 from subject import Subject
 import mysql.connector
+from lesson import Lesson
 
 class Face_Recognition_System:
     def __init__(self, root):
@@ -53,7 +54,7 @@ class Face_Recognition_System:
         self.heading_color()
 
         # Account display
-        self.account = "Tài khoản mẫu"
+        self.account = "admin"
         img_peop = PILImage.open("img/peop.png")
         img_peop = img_peop.resize((27, 27), PILImage.Resampling.LANCZOS)
         self.photoimgpeop = PILImageTk.PhotoImage(img_peop)
@@ -121,7 +122,8 @@ class Face_Recognition_System:
         messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Giáo viên'")
 
     def lesson_data(self):
-        messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Buổi học'")
+        new_window = Toplevel(self.root)
+        self.new_win = Lesson(new_window)
 
     def report_data(self):
         messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Thống kê'")
