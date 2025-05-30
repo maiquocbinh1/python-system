@@ -81,10 +81,3 @@ Hệ thống sử dụng giao diện đồ họa với các nút chức năng ch
 - Nút đăng xuất
 - Giao diện thân thiện với người dùng
 
-## Đóng góp
-
-Mọi đóng góp đều được hoan nghênh. Vui lòng tạo issue hoặc pull request để đóng góp.
-
-## Giấy phép
-
-Dự án này được phát hành dưới giấy phép MIT.
