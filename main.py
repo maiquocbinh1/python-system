@@ -112,7 +112,9 @@ class Face_Recognition_System:
         self.new_win = Student(new_window)
 
     def attendance_data(self):
-        messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Điểm danh'")
+        from attendance import AttendanceSystem
+        new_window = Toplevel(self.root)
+        self.new_win = AttendanceSystem(new_window)
 
     def subject_data(self):
         new_window = Toplevel(self.root)
