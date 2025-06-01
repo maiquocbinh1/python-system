@@ -1,90 +1,75 @@
-# Hệ Thống Điểm Danh Sinh Viên
+# Hệ Thống Điểm Danh Sinh Viên Bằng Nhận Diện Khuôn Mặt
 
-Hệ thống quản lý điểm danh sinh viên được phát triển bằng Python và Tkinter, cung cấp giao diện đồ họa để quản lý thông tin sinh viên, điểm danh, môn học và giáo viên.
+## Mô tả
+Đây là hệ thống quản lý và điểm danh sinh viên sử dụng giao diện Tkinter và cơ sở dữ liệu MySQL. Hệ thống hỗ trợ đăng nhập bằng tài khoản admin hoặc giáo viên, quản lý sinh viên, môn học, buổi học, giáo viên, điểm danh, và thống kê chuyên sâu.
 
-## Cấu trúc dự án
+## Chức năng chính
+- **Đăng nhập:**
+  - Đăng nhập bằng tài khoản admin hoặc giáo viên (email + mật khẩu).
+- **Quản lý sinh viên:**
+  - Thêm, sửa, xóa, tìm kiếm sinh viên.
+- **Quản lý môn học:**
+  - Thêm, sửa, xóa, tìm kiếm môn học.
+- **Quản lý buổi học:**
+  - Thêm, sửa, xóa, tìm kiếm buổi học.
+- **Quản lý giáo viên:**
+  - Thêm, sửa, xóa, tìm kiếm giáo viên.
+- **Điểm danh:**
+  - Giao diện điểm danh sinh viên theo buổi học.
+- **Thống kê:**
+  - Thống kê số sinh viên, số lần điểm danh, số lần đi muộn, số lần vắng, xuất CSV.
 
+## Cấu trúc thư mục
 ```
-├── main.py              # Giao diện chính của ứng dụng
-├── student.py           # Quản lý thông tin sinh viên
-├── teacher.py           # Quản lý thông tin giáo viên
-├── subject.py           # Quản lý thông tin môn học
-├── lesson.py            # Quản lý thông tin buổi học
-├── attendance.py        # Quản lý điểm danh
-├── login.py             # Xử lý đăng nhập hệ thống
-├── pythonsystem1.sql    # Cấu trúc cơ sở dữ liệu
-└── img/                 # Thư mục chứa hình ảnh giao diện
-```
-
-## Tính năng chính
-
-- **Quản lý sinh viên**: Thêm, sửa, xóa và xem thông tin sinh viên
-- **Quản lý giáo viên**: Thêm, sửa, xóa và xem thông tin giáo viên
-- **Quản lý môn học**: Thêm, sửa, xóa và xem thông tin môn học
-- **Quản lý buổi học**: Theo dõi các buổi học và lịch học
-- **Điểm danh**: Ghi nhận điểm danh cho sinh viên
-- **Thống kê**: Xem báo cáo thống kê
-
-## Yêu cầu hệ thống
-
-- Python 3.x
-- MySQL Server
-- Các thư viện Python:
-  - tkinter
-  - PIL (Pillow)
-  - mysql-connector-python
-
-## Cài đặt
-
-1. Cài đặt các thư viện cần thiết:
-```bash
-pip install pillow mysql-connector-python
+├── img/                  # Thư mục chứa các file ảnh giao diện
+├── Attendance_CSV/       # Thư mục xuất file CSV thống kê
+├── login.py              # Giao diện và xử lý đăng nhập
+├── main.py               # Giao diện chính, điều hướng các chức năng
+├── student.py            # Quản lý sinh viên
+├── subject.py            # Quản lý môn học
+├── lesson.py             # Quản lý buổi học
+├── teacher.py            # Quản lý giáo viên
+├── report_attendance.py  # Thống kê điểm danh
+├── pythonsystem.sql      # File cấu trúc và dữ liệu mẫu database
+└── README.md             # File hướng dẫn này
 ```
 
-2. Cấu hình cơ sở dữ liệu:
-- Tạo database MySQL tên `pythonsystem`
-- Import file `pythonsystem1.sql` vào database
+## Hướng dẫn cài đặt
+1. **Cài đặt Python 3.x**
+2. **Cài đặt các thư viện cần thiết:**
+   ```bash
+   pip install pillow tk mysql-connector-python tkcalendar
+   ```
+3. **Cài đặt MySQL và import database:**
+   - Tạo database tên `pythonsystem`.
+   - Import file `pythonsystem.sql` vào MySQL:
+     ```bash
+     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS pythonsystem;"
+     mysql -u root -p pythonsystem < pythonsystem.sql
+     ```
+4. **Đảm bảo các file ảnh giao diện nằm trong thư mục `img/`**
 
-3. Cấu hình kết nối database:
-- Mở file `main.py`
-- Cập nhật thông tin kết nối trong hàm `connect_to_database()`:
-  ```python
-  host='localhost'
-  user='root'
-  password=''
-  database='pythonsystem'
-  port=3306
-  ```
+## Hướng dẫn sử dụng
+1. **Chạy chương trình:**
+   ```bash
+   python login.py
+   ```
+2. **Đăng nhập:**
+   - Nếu chọn "Đăng nhập bằng tài khoản Admin": nhập tài khoản/mật khẩu admin (bảng `admin`).
+   - Nếu không chọn: nhập email/mật khẩu giáo viên (bảng `teacher`).
+3. **Sử dụng các chức năng trên giao diện chính:**
+   - Quản lý sinh viên, môn học, buổi học, giáo viên, điểm danh, thống kê.
+   - Khi bấm "Thống kê" sẽ mở giao diện thống kê chuyên sâu.
 
-## Sử dụng
-
-1. Chạy ứng dụng:
-```bash
-python main.py
-```
-
-2. Đăng nhập vào hệ thống với tài khoản admin
-
-3. Sử dụng các chức năng thông qua giao diện đồ họa:
-   - Quản lý sinh viên
-   - Quản lý giáo viên
-   - Quản lý môn học
-   - Quản lý buổi học
-   - Điểm danh
-   - Thống kê
-
-## Giao diện
-
-Hệ thống sử dụng giao diện đồ họa với các nút chức năng chính:
-- Hiển thị thời gian và ngày tháng
-- Menu chính với các chức năng quản lý
-- Nút đăng xuất
-- Giao diện thân thiện với người dùng
+## Lưu ý
+- Đảm bảo MySQL đang chạy trên máy.
+- Tên database phải là `pythonsystem` (có thể đổi trong code nếu bạn dùng tên khác).
+- Các file ảnh phải đúng tên và nằm trong thư mục `img/`.
 
 ## Đóng góp
+Nếu bạn muốn đóng góp hoặc phát triển thêm, hãy fork repo và gửi pull request!
 
-Mọi đóng góp đều được hoan nghênh. Vui lòng tạo issue hoặc pull request để đóng góp.
+---
+**Tác giả:**
+- Dự án điểm danh sinh viên bằng nhận diện khuôn mặt
 
-## Giấy phép
-
-Dự án này được phát hành dưới giấy phép MIT.

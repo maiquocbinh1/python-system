@@ -980,7 +980,7 @@ class Subject:
         ckstudent = db.fetchall()
         arrayStudent = []
         for cht in ckstudent:
-          
+
             arrayStudent.append(str(cht[0]))
 
         # =========check subject=================
