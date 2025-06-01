@@ -1,4 +1,4 @@
-# Hệ Thống Điểm Danh Sinh Viên Bằng Nhận Diện Khuôn Mặt
+# Hệ Thống Điểm Danh Sinh Viên 
 
 ## Mô tả
 Đây là hệ thống quản lý và điểm danh sinh viên sử dụng giao diện Tkinter và cơ sở dữ liệu MySQL. Hệ thống hỗ trợ đăng nhập bằng tài khoản admin hoặc giáo viên, quản lý sinh viên, môn học, buổi học, giáo viên, điểm danh, và thống kê chuyên sâu.
