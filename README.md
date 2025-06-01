@@ -72,7 +72,4 @@ Nếu bạn muốn đóng góp hoặc phát triển thêm, hãy fork repo và g�
 
 ---
 **Tác giả:**
-- Dự án điểm danh sinh viên bằng nhận diện khuôn mặt
-
-=======
->>>>>>> e532e2d9239e94400bfcc064abcbeddda0032196
+binh
