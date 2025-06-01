@@ -362,7 +362,6 @@ class Student:
         self.var_div.set(data[6])
         self.var_roll.set(data[7])
         self.var_gender.set(data[8])
-        # Xử lý ngày sinh đúng định dạng dd/mm/yyyy
         try:
             from datetime import datetime
             dob_str = data[9]
@@ -375,7 +374,10 @@ class Student:
         self.var_email.set(data[10])
         self.var_phone.set(data[11])
         self.var_address.set(data[12])
-        self.var_radio1.set(data[13])
+        if len(data) > 13:
+            self.var_radio1.set(data[13])
+        else:
+            self.var_radio1.set("")
 
     def update_data(self):
         if self.var_std_id.get() == "":

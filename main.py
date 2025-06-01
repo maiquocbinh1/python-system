@@ -9,6 +9,8 @@ from student import Student  # Import lớp Student
 from subject import Subject
 import mysql.connector
 from lesson import Lesson
+from report_attendance import Report
+from teacher import Teacher
 
 class Face_Recognition_System:
     def __init__(self, root):
@@ -121,14 +123,16 @@ class Face_Recognition_System:
         self.new_win = Subject(new_window)
 
     def teacher_data(self):
-        messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Giáo viên'")
+        new_window = Toplevel(self.root)
+        self.new_win = Teacher(new_window)
 
     def lesson_data(self):
         new_window = Toplevel(self.root)
         self.new_win = Lesson(new_window)
 
     def report_data(self):
-        messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Thống kê'")
+        new_window = Toplevel(self.root)
+        self.new_win = Report(new_window)
 
 def connect_to_database():
     try:

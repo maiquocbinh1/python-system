@@ -18,7 +18,7 @@ def connect_db():
         handler = conn.cursor()
         return conn, handler
     except Exception as e:
-        messagebox.showerror("Lỗi kết nối", f"Không thể kết nối CSDL: {str(e)}")
+        messagebox.showerror("Lỗi kết nối", f"Không thể kết nối CSDL: {str(e)}", parent=self.root)
         return None, None
 
 class AttendanceSystem:
@@ -120,14 +120,14 @@ class AttendanceSystem:
             lessons = handler.fetchall()
             self.lesson_combo['values'] = [f"{l[0]} - {l[1]} - Môn {l[2]}" for l in lessons]
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tải danh sách buổi học: {str(e)}")
+            messagebox.showerror("Lỗi", f"Không thể tải danh sách buổi học: {str(e)}", parent=self.root)
         finally:
             conn.close()
 
     def load_students(self):
         lesson_info = self.lesson_var.get()
         if not lesson_info:
-            messagebox.showerror("Lỗi", "Vui lòng chọn buổi học!")
+            messagebox.showerror("Lỗi", "Vui lòng chọn buổi học!", parent=self.root)
             return
         lesson_id = lesson_info.split(" - ")[0]
         conn, handler = connect_db()
@@ -148,7 +148,7 @@ class AttendanceSystem:
                 status = s[3] if s[3] else "Chưa điểm danh"
                 self.tree.insert('', 'end', values=(s[0], s[1], s[2], status))
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tải danh sách sinh viên: {str(e)}")
+            messagebox.showerror("Lỗi", f"Không thể tải danh sách sinh viên: {str(e)}", parent=self.root)
         finally:
             conn.close()
 
@@ -177,7 +177,7 @@ class AttendanceSystem:
         note = self.var_note.get()
 
         if not student_id or not lesson_id:
-            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!")
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!", parent=self.root)
             return
 
         conn, handler = connect_db()
@@ -186,17 +186,17 @@ class AttendanceSystem:
         try:
             handler.execute("SELECT * FROM attendance WHERE Student_id=%s AND Lesson_id=%s", (student_id, lesson_id))
             if handler.fetchone():
-                messagebox.showwarning("Thông báo", "Sinh viên này đã được điểm danh buổi này rồi!")
+                messagebox.showwarning("Thông báo", "Sinh viên này đã được điểm danh buổi này rồi!", parent=self.root)
                 return
             handler.execute(
                 "INSERT INTO attendance (IdAuttendance, Student_id, Name, Class, Time_in, Date, Lesson_id, AttendanceStatus, Note) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (f"{student_id}_{lesson_id}_{date}", student_id, name, class_name, time_in, date, lesson_id, status, note)
             )
             conn.commit()
-            messagebox.showinfo("Thành công", "Điểm danh thành công!")
+            messagebox.showinfo("Thành công", "Điểm danh thành công!", parent=self.root)
             self.load_attendance_history()
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể điểm danh: {str(e)}")
+            messagebox.showerror("Lỗi", f"Không thể điểm danh: {str(e)}", parent=self.root)
         finally:
             conn.close()
 
@@ -206,17 +206,17 @@ class AttendanceSystem:
         status = self.var_status.get()
         note = self.var_note.get()
         if not student_id or not lesson_id:
-            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!")
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!", parent=self.root)
             return
         conn, handler = connect_db()
         try:
             handler.execute("UPDATE attendance SET AttendanceStatus=%s, Note=%s WHERE Student_id=%s AND Lesson_id=%s", (status, note, student_id, lesson_id))
             conn.commit()
-            messagebox.showinfo("Thành công", "Đã sửa thông tin điểm danh!")
+            messagebox.showinfo("Thành công", "Đã sửa thông tin điểm danh!", parent=self.root)
             self.load_attendance_history()
             self.load_students()
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể sửa điểm danh: {str(e)}")
+            messagebox.showerror("Lỗi", f"Không thể sửa điểm danh: {str(e)}", parent=self.root)
         finally:
             conn.close()
 
@@ -224,19 +224,19 @@ class AttendanceSystem:
         student_id = self.var_student_id.get()
         lesson_id = self.var_lesson_id.get()
         if not student_id or not lesson_id:
-            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!")
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!", parent=self.root)
             return
         conn, handler = connect_db()
         try:
             handler.execute("DELETE FROM attendance WHERE Student_id=%s AND Lesson_id=%s", (student_id, lesson_id))
             conn.commit()
-            messagebox.showinfo("Thành công", "Đã xóa bản ghi điểm danh!")
+            messagebox.showinfo("Thành công", "Đã xóa bản ghi điểm danh!", parent=self.root)
             self.load_attendance_history()
             self.load_students()  # Đồng bộ lại danh sách sinh viên
             self.var_note.set("")
             self.var_status.set("Có mặt")
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể xóa điểm danh: {str(e)}")
+            messagebox.showerror("Lỗi", f"Không thể xóa điểm danh: {str(e)}", parent=self.root)
         finally:
             conn.close()
 
@@ -255,7 +255,7 @@ class AttendanceSystem:
             for r in records:
                 self.history_tree.insert('', 'end', values=r)
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tải lịch sử điểm danh: {str(e)}")
+            messagebox.showerror("Lỗi", f"Không thể tải lịch sử điểm danh: {str(e)}", parent=self.root)
         finally:
             conn.close()
 

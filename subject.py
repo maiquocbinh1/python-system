@@ -512,7 +512,7 @@ class Subject:
             try:
                 conn = mysql.connector.connect(host='localhost', user='root', password='', database='pythonsystem', port='3306')
                 db=conn.cursor()
-                db.execute("insert into subject values(%s,%s,%s)",(
+                db.execute("insert into subject (Subject_id, Subject_name, Class) values(%s,%s,%s)", (
                     self.var_subid.get(),
                     self.var_subname.get(),
                     self.var_subclass.get(),
@@ -925,7 +925,6 @@ class Subject:
         ckStudent = db.fetchall()
         arrayStudent = []
         for cht in ckStudent:
-            # print(cht[0])
             arrayStudent.append(str(cht[0]))
         if(self.var_studentsub.get() not in arrayStudent):
 
@@ -980,11 +979,6 @@ class Subject:
         ckstudent = db.fetchall()
         arrayStudent = []
         for cht in ckstudent:
-<<<<<<< HEAD
-
-=======
-            # print(cht[0])
->>>>>>> parent of b8eafba (hoan thien not chuc nang thong ke va cap nhat document)
             arrayStudent.append(str(cht[0]))
 
         # =========check subject=================
