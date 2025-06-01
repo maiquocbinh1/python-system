@@ -128,7 +128,14 @@ class Login_Window:
                     new_print(teacher[0])  # Pass teacher ID
                     self.reset()
                     self.new_window = Toplevel(self.root)
-                    self.app = Face_Recognition_System(self.new_window)
+                    # Truyền thông tin giáo viên vào main window
+                    user_info = {
+                        'id': teacher[0],
+                        'name': teacher[1],  # Tên giáo viên
+                        'email': teacher[2],
+                        'role': 'teacher'
+                    }
+                    self.app = Face_Recognition_System(self.new_window, user_info)
                 else:
                     messagebox.showerror("Lỗi", "Sai tài khoản hoặc mật khẩu")
 

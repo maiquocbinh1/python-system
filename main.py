@@ -13,10 +13,11 @@ from report_attendance import Report
 from teacher import Teacher
 
 class Face_Recognition_System:
-    def __init__(self, root):
+    def __init__(self, root, user_info=None):
         self.root = root
         self.root.geometry("1530x790+0+0")
         self.root.title("Hệ thống điểm danh sinh viên")
+        self.user_info = user_info  # Lưu thông tin người dùng đăng nhập
 
         today = strftime("%d-%m-%Y")
 
@@ -56,13 +57,18 @@ class Face_Recognition_System:
         self.heading_color()
 
         # Account display
-        self.account = "admin"
         img_peop = PILImage.open("img/peop.png")
         img_peop = img_peop.resize((27, 27), PILImage.Resampling.LANCZOS)
         self.photoimgpeop = PILImageTk.PhotoImage(img_peop)
         Label(self.root, image=self.photoimgpeop, bg="white").place(x=970, y=45, width=27, height=27)
 
-        Label(self.root, text=self.account, font=("yu gothic ui", 12, "bold"), bg="white", fg="green").place(x=1000, y=48, width=150, height=22)
+        # Hiển thị tên người dùng
+        if self.user_info and 'name' in self.user_info:
+            display_name = self.user_info['name']
+        else:
+            display_name = "admin"
+            
+        Label(self.root, text=display_name, font=("yu gothic ui", 12, "bold"), bg="white", fg="green").place(x=1000, y=48, width=150, height=22)
 
         # Logout
         img_logout = PILImage.open("img/logout.png")
