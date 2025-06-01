@@ -1,9 +1,7 @@
-import os
 from tkinter import *
 from tkinter import ttk, messagebox
 from time import strftime
 import mysql.connector
-from tkcalendar import DateEntry
 from datetime import datetime
 
 def connect_db():
@@ -18,7 +16,7 @@ def connect_db():
         handler = conn.cursor()
         return conn, handler
     except Exception as e:
-        messagebox.showerror("Lỗi kết nối", f"Không thể kết nối CSDL: {str(e)}", parent=self.root)
+        messagebox.showerror("Lỗi kết nối", f"Không thể kết nối CSDL: {str(e)}")
         return None, None
 
 class AttendanceSystem:
@@ -216,7 +214,7 @@ class AttendanceSystem:
             self.load_attendance_history()
             self.load_students()
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể sửa điểm danh: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể sửa điểm danh: {str(e)}")
         finally:
             conn.close()
 
@@ -224,19 +222,19 @@ class AttendanceSystem:
         student_id = self.var_student_id.get()
         lesson_id = self.var_lesson_id.get()
         if not student_id or not lesson_id:
-            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!", parent=self.root)
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!")
             return
         conn, handler = connect_db()
         try:
             handler.execute("DELETE FROM attendance WHERE Student_id=%s AND Lesson_id=%s", (student_id, lesson_id))
             conn.commit()
-            messagebox.showinfo("Thành công", "Đã xóa bản ghi điểm danh!", parent=self.root)
+            messagebox.showinfo("Thành công", "Đã xóa bản ghi điểm danh!")
             self.load_attendance_history()
             self.load_students()  # Đồng bộ lại danh sách sinh viên
             self.var_note.set("")
             self.var_status.set("Có mặt")
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể xóa điểm danh: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể xóa điểm danh: {str(e)}")
         finally:
             conn.close()
 
@@ -255,7 +253,7 @@ class AttendanceSystem:
             for r in records:
                 self.history_tree.insert('', 'end', values=r)
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tải lịch sử điểm danh: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể tải lịch sử điểm danh: {str(e)}")
         finally:
             conn.close()
 
