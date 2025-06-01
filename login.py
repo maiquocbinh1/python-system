@@ -117,7 +117,7 @@ class Login_Window:
                     self.reset()#xoathongtindanhapkhidangnhapthanhcong
                     messagebox.showinfo("Thông báo", "Đăng nhập thành công với quyền Admin")
                     self.new_window = Toplevel(self.root)#mocuasomoi
-                    self.app = Face_Recognition_System(self.new_window)
+                    self.app = Face_Recognition_System(self.new_window, account_name="admin")
                 else:
                     messagebox.showerror("Lỗi", "Sai tài khoản hoặc mật khẩu")
             else:  # Teacher login
@@ -128,7 +128,7 @@ class Login_Window:
                     new_print(teacher[0])  # Pass teacher ID
                     self.reset()
                     self.new_window = Toplevel(self.root)
-                    self.app = Face_Recognition_System(self.new_window)
+                    self.app = Face_Recognition_System(self.new_window, account_name=teacher[1])
                 else:
                     messagebox.showerror("Lỗi", "Sai tài khoản hoặc mật khẩu")
 
