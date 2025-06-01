@@ -9,11 +9,9 @@ from student import Student  # Import lớp Student
 from subject import Subject
 import mysql.connector
 from lesson import Lesson
-from teacher import Teacher
-from report_attendance import Report
 
 class Face_Recognition_System:
-    def __init__(self, root, account_name="admin"):
+    def __init__(self, root):
         self.root = root
         self.root.geometry("1530x790+0+0")
         self.root.title("Hệ thống điểm danh sinh viên")
@@ -56,7 +54,7 @@ class Face_Recognition_System:
         self.heading_color()
 
         # Account display
-        self.account = account_name
+        self.account = "admin"
         img_peop = PILImage.open("img/peop.png")
         img_peop = img_peop.resize((27, 27), PILImage.Resampling.LANCZOS)
         self.photoimgpeop = PILImageTk.PhotoImage(img_peop)
@@ -123,16 +121,14 @@ class Face_Recognition_System:
         self.new_win = Subject(new_window)
 
     def teacher_data(self):
-        new_window = Toplevel(self.root)
-        self.new_win = Teacher(new_window)
+        messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Giáo viên'")
 
     def lesson_data(self):
         new_window = Toplevel(self.root)
         self.new_win = Lesson(new_window)
 
     def report_data(self):
-        new_window = Toplevel(self.root)
-        self.new_win = Report(new_window)
+        messagebox.showinfo("Thông báo", "Bạn đã nhấn vào nút 'Thống kê'")
 
 def connect_to_database():
     try:

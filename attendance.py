@@ -24,60 +24,12 @@ def connect_db():
 class AttendanceSystem:
     def __init__(self, root):
         self.root = root
-        self.root.geometry("1400x800+50+50")
+        self.root.geometry("1200x650+100+50")
         self.root.title("Hệ thống điểm danh sinh viên")
 
-        # Main container
-        main_frame = Frame(self.root)
-        main_frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
-
-        # Top section - Lesson selection and controls
-        top_frame = LabelFrame(main_frame, text="Thông tin buổi học", font=("Arial", 12, "bold"))
-        top_frame.pack(fill="x", pady=(0, 10))
-
-        # Lesson selection
-        lesson_frame = Frame(top_frame)
-        lesson_frame.pack(fill="x", padx=10, pady=10)
-        
-        Label(lesson_frame, text="Buổi học:", font=("Arial", 11)).pack(side=LEFT, padx=5)
-        self.lesson_var = StringVar()
-        self.lesson_combo = ttk.Combobox(lesson_frame, textvariable=self.lesson_var, font=("Arial", 11), width=50, state="readonly")
-        self.lesson_combo.pack(side=LEFT, padx=5)
-        self.load_lessons()
-
-        Button(lesson_frame, text="Xem danh sách sinh viên", command=self.load_students, 
-               font=("Arial", 11), bg="#4CAF50", fg="white").pack(side=LEFT, padx=10)
-
-        # Status and note controls
-        control_frame = Frame(top_frame)
-        control_frame.pack(fill="x", padx=10, pady=10)
-
-        Label(control_frame, text="Trạng thái:", font=("Arial", 11)).pack(side=LEFT, padx=5)
-        self.status_var = StringVar(value="Có mặt")
-        status_combo = ttk.Combobox(control_frame, textvariable=self.status_var, 
-                                  font=("Arial", 11), width=15, state="readonly")
-        status_combo['values'] = ("Có mặt", "Vắng", "Đi muộn")
-        status_combo.pack(side=LEFT, padx=5)
-
-        Label(control_frame, text="Ghi chú:", font=("Arial", 11)).pack(side=LEFT, padx=5)
-        self.var_note = StringVar()
-        Entry(control_frame, textvariable=self.var_note, width=30).pack(side=LEFT, padx=5)
-
-        # Action buttons
-        Button(control_frame, text="Lưu", command=self.checkin, 
-               font=("Arial", 11, "bold"), bg="#28b779", fg="white").pack(side=LEFT, padx=5)
-        Button(control_frame, text="Sửa", command=self.edit_attendance, 
-               font=("Arial", 11, "bold"), bg="#5bc0de", fg="white").pack(side=LEFT, padx=5)
-        Button(control_frame, text="Xóa", command=self.delete_attendance, 
-               font=("Arial", 11, "bold"), bg="#d9534f", fg="white").pack(side=LEFT, padx=5)
-
-        # Middle section - Student details and list
-        middle_frame = Frame(main_frame)
-        middle_frame.pack(fill="both", expand=True, pady=10)
-
-        # Student details (left side)
-        detail_frame = LabelFrame(middle_frame, text="Thông tin sinh viên", font=("Arial", 12, "bold"))
-        detail_frame.pack(side=LEFT, fill="y", padx=(0, 10))
+        # Frame chi tiết điểm danh (bên trái)
+        detail_frame = LabelFrame(self.root, text="Cập Nhật điểm danh", font=("Arial", 12, "bold"))
+        detail_frame.pack(side=LEFT, fill="y", padx=10, pady=10)
 
         self.var_student_id = StringVar()
         self.var_student_name = StringVar()
@@ -87,46 +39,75 @@ class AttendanceSystem:
         self.var_status = StringVar()
         self.var_lesson_id = StringVar()
 
-        # Create a grid layout for student details
-        details = [
-            ("ID Sinh viên:", self.var_student_id),
-            ("Tên sinh viên:", self.var_student_name),
-            ("Lớp học:", self.var_class),
-            ("Giờ vào:", self.var_time_in),
-            ("Ngày:", self.var_date),
-            ("ID Bài học:", self.var_lesson_id),
-            ("Trạng thái:", self.var_status)
-        ]
+        Label(detail_frame, text="ID Sinh viên:").pack(anchor=W)
+        Entry(detail_frame, textvariable=self.var_student_id, state="readonly").pack(fill=X)
+        Label(detail_frame, text="Tên sinh viên:").pack(anchor=W)
+        Entry(detail_frame, textvariable=self.var_student_name, state="readonly").pack(fill=X)
+        Label(detail_frame, text="Lớp học:").pack(anchor=W)
+        Entry(detail_frame, textvariable=self.var_class, state="readonly").pack(fill=X)
+        Label(detail_frame, text="Giờ vào:").pack(anchor=W)
+        Entry(detail_frame, textvariable=self.var_time_in, state="readonly").pack(fill=X)
+        Label(detail_frame, text="Ngày:").pack(anchor=W)
+        Entry(detail_frame, textvariable=self.var_date, state="readonly").pack(fill=X)
+        Label(detail_frame, text="ID Bài học:").pack(anchor=W)
+        Entry(detail_frame, textvariable=self.var_lesson_id, state="readonly").pack(fill=X)
+        Label(detail_frame, text="Trạng thái:").pack(anchor=W)
+        Entry(detail_frame, textvariable=self.var_status, state="readonly").pack(fill=X)
 
-        for i, (label, var) in enumerate(details):
-            Label(detail_frame, text=label, font=("Arial", 11)).grid(row=i, column=0, sticky=W, padx=10, pady=5)
-            Entry(detail_frame, textvariable=var, state="readonly", width=25).grid(row=i, column=1, padx=10, pady=5)
+        # Frame chọn buổi học (bên phải)
+        right_frame = Frame(self.root)
+        right_frame.pack(side=LEFT, fill=BOTH, expand=True)
 
-        # Student list (right side)
-        list_frame = LabelFrame(middle_frame, text="Danh sách sinh viên", font=("Arial", 12, "bold"))
-        list_frame.pack(side=LEFT, fill="both", expand=True)
+        lesson_frame = LabelFrame(right_frame, text="Chọn buổi học", font=("Arial", 12, "bold"))
+        lesson_frame.pack(fill="x", padx=10, pady=10)
+
+        Label(lesson_frame, text="Buổi học:", font=("Arial", 11)).grid(row=0, column=0, padx=5, pady=5, sticky=W)
+        self.lesson_var = StringVar()
+        self.lesson_combo = ttk.Combobox(lesson_frame, textvariable=self.lesson_var, font=("Arial", 11), width=35, state="readonly")
+        self.lesson_combo.grid(row=0, column=1, padx=5, pady=5, sticky=W)
+        self.load_lessons()
+
+        Button(lesson_frame, text="Xem danh sách sinh viên", command=self.load_students, font=("Arial", 11)).grid(row=0, column=2, padx=10)
+
+        # Frame danh sách sinh viên
+        student_frame = LabelFrame(right_frame, text="Danh sách sinh viên", font=("Arial", 12, "bold"))
+        student_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
         columns = ("Mã SV", "Tên", "Lớp", "Trạng thái")
-        self.tree = ttk.Treeview(list_frame, columns=columns, show="headings", selectmode="browse")
+        self.tree = ttk.Treeview(student_frame, columns=columns, show="headings", selectmode="browse")
         for col in columns:
             self.tree.heading(col, text=col)
             self.tree.column(col, width=120)
-        self.tree.pack(fill="both", expand=True, padx=10, pady=10)
+        self.tree.pack(fill="both", expand=True)
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
 
-        # Bottom section - Attendance history
-        history_frame = LabelFrame(main_frame, text="Lịch sử điểm danh", font=("Arial", 12, "bold"))
-        history_frame.pack(fill="both", expand=True, pady=(10, 0))
+        # Frame điểm danh
+        checkin_frame = Frame(right_frame)
+        checkin_frame.pack(fill="x", padx=10, pady=10)
 
-        self.history_tree = ttk.Treeview(history_frame, 
-            columns=("Mã SV", "Tên", "Lớp", "Thời gian", "Ngày", "Trạng thái", "ID Bài học", "Ghi chú"), 
-            show="headings")
-        
+        Label(checkin_frame, text="Trạng thái:", font=("Arial", 11)).pack(side=LEFT, padx=5)
+        self.status_var = StringVar(value="Có mặt")
+        status_combo = ttk.Combobox(checkin_frame, textvariable=self.status_var, font=("Arial", 11), width=15, state="readonly")
+        status_combo['values'] = ("Có mặt", "Vắng", "Đi muộn")
+        status_combo.pack(side=LEFT, padx=5)
+
+        # Thêm trường ghi chú
+        self.var_note = StringVar()
+        Label(checkin_frame, text="Ghi chú:", font=("Arial", 11)).pack(side=LEFT, padx=5)
+        Entry(checkin_frame, textvariable=self.var_note, width=20).pack(side=LEFT, padx=5)
+
+        Button(checkin_frame, text="Lưu", command=self.checkin, font=("Arial", 12, "bold"), bg="#28b779", fg="white").pack(side=LEFT, padx=5)
+        Button(checkin_frame, text="Sửa", command=self.edit_attendance, font=("Arial", 12, "bold"), bg="#5bc0de", fg="white").pack(side=LEFT, padx=5)
+        Button(checkin_frame, text="Xóa", command=self.delete_attendance, font=("Arial", 12, "bold"), bg="#d9534f", fg="white").pack(side=LEFT, padx=5)
+
+        # Lịch sử điểm danh
+        history_frame = LabelFrame(right_frame, text="Lịch sử điểm danh", font=("Arial", 12, "bold"))
+        history_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.history_tree = ttk.Treeview(history_frame, columns=("Mã SV", "Tên", "Lớp", "Thời gian", "Ngày", "Trạng thái", "ID Bài học", "Ghi chú"), show="headings")
         for col in ("Mã SV", "Tên", "Lớp", "Thời gian", "Ngày", "Trạng thái", "ID Bài học", "Ghi chú"):
             self.history_tree.heading(col, text=col)
             self.history_tree.column(col, width=100)
-        
-        self.history_tree.pack(fill="both", expand=True, padx=10, pady=10)
+        self.history_tree.pack(fill="both", expand=True)
         self.history_tree.bind("<<TreeviewSelect>>", self.on_history_select)
         self.load_attendance_history()
 
@@ -139,14 +120,14 @@ class AttendanceSystem:
             lessons = handler.fetchall()
             self.lesson_combo['values'] = [f"{l[0]} - {l[1]} - Môn {l[2]}" for l in lessons]
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tải danh sách buổi học: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể tải danh sách buổi học: {str(e)}")
         finally:
             conn.close()
 
     def load_students(self):
         lesson_info = self.lesson_var.get()
         if not lesson_info:
-            messagebox.showerror("Lỗi", "Vui lòng chọn buổi học!", parent=self.root)
+            messagebox.showerror("Lỗi", "Vui lòng chọn buổi học!")
             return
         lesson_id = lesson_info.split(" - ")[0]
         conn, handler = connect_db()
@@ -167,7 +148,7 @@ class AttendanceSystem:
                 status = s[3] if s[3] else "Chưa điểm danh"
                 self.tree.insert('', 'end', values=(s[0], s[1], s[2], status))
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tải danh sách sinh viên: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể tải danh sách sinh viên: {str(e)}")
         finally:
             conn.close()
 
@@ -196,7 +177,7 @@ class AttendanceSystem:
         note = self.var_note.get()
 
         if not student_id or not lesson_id:
-            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!", parent=self.root)
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!")
             return
 
         conn, handler = connect_db()
@@ -205,17 +186,17 @@ class AttendanceSystem:
         try:
             handler.execute("SELECT * FROM attendance WHERE Student_id=%s AND Lesson_id=%s", (student_id, lesson_id))
             if handler.fetchone():
-                messagebox.showwarning("Thông báo", "Sinh viên này đã được điểm danh buổi này rồi!", parent=self.root)
+                messagebox.showwarning("Thông báo", "Sinh viên này đã được điểm danh buổi này rồi!")
                 return
             handler.execute(
                 "INSERT INTO attendance (IdAuttendance, Student_id, Name, Class, Time_in, Date, Lesson_id, AttendanceStatus, Note) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (f"{student_id}_{lesson_id}_{date}", student_id, name, class_name, time_in, date, lesson_id, status, note)
             )
             conn.commit()
-            messagebox.showinfo("Thành công", "Điểm danh thành công!", parent=self.root)
+            messagebox.showinfo("Thành công", "Điểm danh thành công!")
             self.load_attendance_history()
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể điểm danh: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể điểm danh: {str(e)}")
         finally:
             conn.close()
 
@@ -225,17 +206,17 @@ class AttendanceSystem:
         status = self.var_status.get()
         note = self.var_note.get()
         if not student_id or not lesson_id:
-            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!", parent=self.root)
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!")
             return
         conn, handler = connect_db()
         try:
             handler.execute("UPDATE attendance SET AttendanceStatus=%s, Note=%s WHERE Student_id=%s AND Lesson_id=%s", (status, note, student_id, lesson_id))
             conn.commit()
-            messagebox.showinfo("Thành công", "Đã sửa thông tin điểm danh!", parent=self.root)
+            messagebox.showinfo("Thành công", "Đã sửa thông tin điểm danh!")
             self.load_attendance_history()
             self.load_students()
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể sửa điểm danh: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể sửa điểm danh: {str(e)}")
         finally:
             conn.close()
 
@@ -243,19 +224,19 @@ class AttendanceSystem:
         student_id = self.var_student_id.get()
         lesson_id = self.var_lesson_id.get()
         if not student_id or not lesson_id:
-            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!", parent=self.root)
+            messagebox.showerror("Lỗi", "Vui lòng chọn sinh viên và buổi học!")
             return
         conn, handler = connect_db()
         try:
             handler.execute("DELETE FROM attendance WHERE Student_id=%s AND Lesson_id=%s", (student_id, lesson_id))
             conn.commit()
-            messagebox.showinfo("Thành công", "Đã xóa bản ghi điểm danh!", parent=self.root)
+            messagebox.showinfo("Thành công", "Đã xóa bản ghi điểm danh!")
             self.load_attendance_history()
             self.load_students()  # Đồng bộ lại danh sách sinh viên
             self.var_note.set("")
             self.var_status.set("Có mặt")
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể xóa điểm danh: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể xóa điểm danh: {str(e)}")
         finally:
             conn.close()
 
@@ -274,7 +255,7 @@ class AttendanceSystem:
             for r in records:
                 self.history_tree.insert('', 'end', values=r)
         except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tải lịch sử điểm danh: {str(e)}", parent=self.root)
+            messagebox.showerror("Lỗi", f"Không thể tải lịch sử điểm danh: {str(e)}")
         finally:
             conn.close()
 

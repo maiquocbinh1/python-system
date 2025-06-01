@@ -375,10 +375,7 @@ class Student:
         self.var_email.set(data[10])
         self.var_phone.set(data[11])
         self.var_address.set(data[12])
-        if len(data) > 13:
-            self.var_radio1.set(data[13])
-        else:
-            self.var_radio1.set("")
+        self.var_radio1.set(data[13])
 
     def update_data(self):
         if self.var_std_id.get() == "":
